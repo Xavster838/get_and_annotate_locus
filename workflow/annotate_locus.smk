@@ -10,7 +10,7 @@ def get_fasta(wc):
 ####################                                Rhodonite: RepeatMasker and DupMasker
 module Rhodonite:
     snakefile:
-        "https://github.com/mrvollger/Rhodonite/raw/master/workflow/Snakefile"
+        "/net/eichler/vol26/home/guitarfx/software/github_clones/Rhodonite/workflow/Snakefile"
     config:
         config = {
             "samples" : dict( zip( list(manifest["sample"] + "__" + manifest["hap"] ) ,  list(manifest["fasta"]) ) )
