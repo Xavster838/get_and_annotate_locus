@@ -1,0 +1,2 @@
+MM_OPTS : "-r 50000 -x asm20 -z 10000 -s 25000"
+manifest : "/Users/xaviguitart/Desktop/school_related/University_Of_Washington/phd/software/in_development/20220718_smk_get_annotate_locus/manifest.txt"
