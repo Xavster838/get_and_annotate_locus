@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from Bio import SeqIO
 
@@ -13,4 +14,5 @@ with open(snakemake.input.samp_fasta) as original_file:
         seq.description = "" #description added to end of header. was old name previously.
     with open(snakemake.output.new_fa, "w") as output_handle:
         SeqIO.write(records, output_handle, "fasta")
+os.system(f"samtools faidx {snakemake.output.new_fa}")
 name_change_df.to_csv( snakemake.output.old_new_name_map , sep = "\t", header = True, index = False)
