@@ -24,7 +24,8 @@ rule _rename_fasta:
       samp_fasta = get_fasta
     output:
       old_new_name_map = "rename_fastas/tigName_maps/{sm}_{h}_tig_name_changes.tbl" ,
-      new_fa = temp("rename_fastas/fastas/{sm}_{h}.fasta"),
+      new_fa = "rename_fastas/fastas/{sm}_{h}.fasta",
+      new_fai = "rename_fastas/fastas/{sm}_{h}.fasta.fai"
     conda: 
       "envs/env.yml"
     script:
