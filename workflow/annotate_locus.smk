@@ -14,6 +14,21 @@ manifest = manifest.set_index(["sample" , "hap"] , drop = False)
 
 config["samples"] = dict( zip( list(manifest["sample"] + "__" + manifest["hap"] ) ,  list( "rename_fastas/fastas/" + manifest["sample"] + "_" + manifest["hap"] + ".fasta" ) ) ) #list(manifest["fasta"]) ) )
 
+def get_fasta(wc):
+    '''return fasta from manifest'''
+    return manifest.loc[wc.sm, wc.h]['fasta']
+
+rule _rename_fasta:
+    '''rename sample contigs to only contain: sample_hap_tig1,2,... and merge to single combined fasta'''
+    input:
+      samp_fasta = get_fasta
+    output:
+      old_new_name_map = "rename_fastas/tigName_maps/{sm}_{h}_tig_name_changes.tbl" ,
+      new_fa = temp("rename_fastas/fastas/{sm}_{h}.fasta"),
+    conda: 
+      "envs/env.yml"
+    script:
+      "scripts/rename_fasta.py"
 
 # import the rules from Rhodonite
 use rule * from Rhodonite as Rhodonite_*
@@ -36,21 +51,6 @@ rule only_dup:
 #     bedtools bamtobed -i - | awk 'BEGIN{{OFS="\t"}}{{print $0, "{wildcards.r}__{wildcards.sm}_{wildcards.h}__" NR }}' > {output.bed} || touch {output.bed}
 # """
 
-def get_fasta(wc):
-    '''return fasta from manifest'''
-    return manifest.loc[wc.sm, wc.h]['fasta']
-
-rule _rename_fasta:
-    '''rename sample contigs to only contain: sample_hap_tig1,2,... and merge to single combined fasta'''
-    input:
-      samp_fasta = get_fasta
-    output:
-      old_new_name_map = "rename_fastas/tigName_maps/{sm}_{h}_tig_name_changes.tbl" ,
-      new_fa = temp("rename_fastas/fastas/{sm}_{h}.fasta"),
-    conda: 
-      "envs/env.yml"
-    script:
-      "scripts/rename_fasta.py"
 rule all:
     input:
         expand(rules.Rhodonite_DupMasker.output, sample=config["samples"].keys())
