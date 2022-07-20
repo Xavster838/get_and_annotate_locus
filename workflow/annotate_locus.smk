@@ -12,7 +12,7 @@ module Rhodonite:
 manifest = pd.read_csv(config["manifest"], sep = "\t")
 manifest = manifest.set_index(["sample" , "hap"] , drop = False)
 
-config["samples"] = dict( zip( list(manifest["sample"] + "__" + manifest["hap"] ) ,  list(manifest["fasta"]) ) )
+config["samples"] = dict( zip( list(manifest["sample"] + "__" + manifest["hap"] ) ,  list( "rename_fastas/fastas/" + manifest["sample"] + "_" + manifest["hap"] + ".fasta" ) ) ) #list(manifest["fasta"]) ) )
 
 
 # import the rules from Rhodonite
