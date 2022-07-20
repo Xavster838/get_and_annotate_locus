@@ -36,6 +36,10 @@ rule only_dup:
 #     bedtools bamtobed -i - | awk 'BEGIN{{OFS="\t"}}{{print $0, "{wildcards.r}__{wildcards.sm}_{wildcards.h}__" NR }}' > {output.bed} || touch {output.bed}
 # """
 
+def get_fasta(wc):
+    '''return fasta from manifest'''
+    return manifest.loc[wc.sm, wc.h]['fasta']
+
 rule _rename_fasta:
     '''rename sample contigs to only contain: sample_hap_tig1,2,... and merge to single combined fasta'''
     input:
@@ -43,8 +47,8 @@ rule _rename_fasta:
     output:
       old_new_name_map = "rename_fastas/tigName_maps/{sm}_{h}_tig_name_changes.tbl" ,
       new_fa = temp("rename_fastas/fastas/{sm}_{h}.fasta"),
-    params:
-      manifest_df = get_manifest_df
+    conda: 
+      "envs/env.yml"
     run:
         name_change_df = pd.DataFrame(columns = ['original_fasta', 'original_name', 'new_fasta' , 'new_name'])
         with open(input.samp_fasta) as original_file:
