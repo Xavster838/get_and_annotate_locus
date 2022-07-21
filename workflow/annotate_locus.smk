@@ -3,16 +3,8 @@ import pandas as pd
 
 min_version("6.0")
 
-module Rhodonite:
-    snakefile:
-        "https://github.com/mrvollger/Rhodonite/raw/v0.7-alpha/workflow/Snakefile"
-    config:
-        config
-
 manifest = pd.read_csv(config["manifest"], sep = "\t")
 manifest = manifest.set_index(["sample" , "hap"] , drop = False)
-
-config["samples"] = dict( zip( list(manifest["sample"] + "__" + manifest["hap"] ) ,  list( "rename_fastas/fastas/" + manifest["sample"] + "_" + manifest["hap"] + ".fasta" ) ) ) #list(manifest["fasta"]) ) )
 
 def get_fasta(wc):
     '''return fasta from manifest'''
@@ -31,13 +23,25 @@ rule _rename_fasta:
     script:
       "scripts/rename_fasta.py"
 
-# import the rules from Rhodonite
-use rule * from Rhodonite as Rhodonite_*
-
-# use RepeatMasker rules from Rhodonite
-rule only_dup:
+rule _get_rhodonite_manifest:
+    '''generate manifest needed to structure config for running dupmasker and repeat masker in mitchell's rhodonite snakemake'''
     input:
-        expand(rules.Rhodonite_DupMasker.output, sample = config["samples"].keys() )
+      old_new_name_map = rules._rename_fasta.output.old_new_name_map
+    output:
+      dup_man = "Dupmasker/dup_manifest.tbl"
+    params:
+      sms = manifest["sample"] + "_" + manifest["hap"]
+    run:
+      new_name_map_df = pd.read_csv(input.old_new_name_map ,  sep = "\t")
+      out_df = pd.DataFrame(columns = ["sample", "fasta"])
+      for i,sm in params.sms:
+        fasta = [f for f in new_name_map_df['new_fasta'] if sm in f]
+        assert len(fasta == 1) , f"rule _get_rhodonite_manifest failed for {sm} sample and {fasta} .  got ether zero or more than one fasta with {sm} in name."
+        out_df.loc[i] = [sm , fasta[0]]
+      out_df.to_csv(output.dup_man , sep = "\t", index = False, header = T)
+        
+      
+
 
 # rule get_locus_annotation:
 #     '''given a sequence fasta, align and find places that locus maps to into he query haplotypes (for genes, duplicons, etc.).'''
