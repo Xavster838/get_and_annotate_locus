@@ -26,23 +26,22 @@ rule _rename_fasta:
 rule _get_rhodonite_manifest:
     '''generate manifest needed to structure config for running dupmasker and repeat masker in mitchell's rhodonite snakemake'''
     input:
-      old_new_name_map = rules._rename_fasta.output.old_new_name_map
+      old_new_name_maps = expand("rename_fastas/tigName_maps/{samp}_tig_name_changes.tbl" , samp = ["_".join(x) for x in list( zip(manifest["sample"], manifest["hap"]) )] ) #rules._rename_fasta.output.old_new_name_map
     output:
       dup_man = "Dupmasker/dup_manifest.tbl"
     params:
       sms = manifest["sample"] + "_" + manifest["hap"]
     run:
-      new_name_map_df = pd.read_csv(input.old_new_name_map ,  sep = "\t")
+      new_name_map_f = pd.concat( [pd.read_csv(x, sep = "\t") for x in input.old_new_name_maps ] , axis = 0)
       out_df = pd.DataFrame(columns = ["sample", "fasta"])
-      for i,sm in params.sms:
-        fasta = [f for f in new_name_map_df['new_fasta'] if sm in f]
-        assert len(fasta == 1) , f"rule _get_rhodonite_manifest failed for {sm} sample and {fasta} .  got ether zero or more than one fasta with {sm} in name."
-        out_df.loc[i] = [sm , fasta[0]]
+      for i,sm sms:
+          fasta = [f for f in new_name_map_df['new_fasta'] if sm in f]
+          fasta = list(set(fasta))
+          assert len(fasta) == 1 , f"rule _get_rhodonite_manifest failed for {sm} sample.  got ether zero or more than one fasta with {sm} in name: \n{row}"
+          out_df.loc[i] = [sm ,fasta[0] ]
       out_df.to_csv(output.dup_man , sep = "\t", index = False, header = T)
         
       
-
-
 # rule get_locus_annotation:
 #     '''given a sequence fasta, align and find places that locus maps to into he query haplotypes (for genes, duplicons, etc.).'''
 #     input:
@@ -55,8 +54,7 @@ rule _get_rhodonite_manifest:
 #     samtools view -b - | samtools sort | \
 #     bedtools bamtobed -i - | awk 'BEGIN{{OFS="\t"}}{{print $0, "{wildcards.r}__{wildcards.sm}_{wildcards.h}__" NR }}' > {output.bed} || touch {output.bed}
 # """
-
-rule all:
-    input:
-        expand(rules.Rhodonite_DupMasker.output, sample=config["samples"].keys())
+# rule all:
+#     input:
+#         expand(rules.Rhodonite_DupMasker.output, sample=config["samples"].keys())
 
