@@ -32,14 +32,14 @@ rule _get_rhodonite_manifest:
     params:
       sms = manifest["sample"] + "_" + manifest["hap"]
     run:
-      new_name_map_f = pd.concat( [pd.read_csv(x, sep = "\t") for x in input.old_new_name_maps ] , axis = 0)
+      new_name_map_df = pd.concat( [pd.read_csv(x, sep = "\t") for x in input.old_new_name_maps ] , axis = 0)
       out_df = pd.DataFrame(columns = ["sample", "fasta"])
-      for i,sm sms:
+      for i,sm in enumerate(params.sms):
           fasta = [f for f in new_name_map_df['new_fasta'] if sm in f]
           fasta = list(set(fasta))
           assert len(fasta) == 1 , f"rule _get_rhodonite_manifest failed for {sm} sample.  got ether zero or more than one fasta with {sm} in name: \n{row}"
           out_df.loc[i] = [sm ,fasta[0] ]
-      out_df.to_csv(output.dup_man , sep = "\t", index = False, header = T)
+      out_df.to_csv(output.dup_man , sep = "\t", index = False, header = True)
         
       
 # rule get_locus_annotation:
