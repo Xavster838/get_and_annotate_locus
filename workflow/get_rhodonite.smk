@@ -10,7 +10,7 @@ module Rhodonite:
         config
 
 manifest = pd.read_csv(config["manifest"], sep = "\t")
-config["samples"] = dict( zip( list(manifest["sample"]) ,  list(manifest["fasta"]) #list(manifest["fasta"]) ) )
+config["samples"] = dict( zip( list(manifest["sample"]) ,  list(manifest["fasta"]) ) ) #list(manifest["fasta"]) ) )
 
 # import the rules from Rhodonite
 use rule * from Rhodonite as Rhodonite_*
