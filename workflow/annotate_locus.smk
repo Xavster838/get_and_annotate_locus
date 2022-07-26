@@ -53,18 +53,20 @@ rule run_dupmasker:
   shell:"""
 snakemake -s {workflow.basedir}/get_rhodonite.smk only_dup -j 50 -p --config manifest={input.manifest} --use-conda --conda-prefix /net/eichler/vol26/home/guitarfx/software/my_snakemake_conda_envs 
 """
-# rule get_locus_annotation:
-#     '''given a sequence fasta, align and find places that locus maps to into he query haplotypes (for genes, duplicons, etc.).'''
-#     input:
-#         locus_fa = config["locus_fa"] ,
-#         hap_fa = get_fasta,
-#     output:
-#         bed = "{sm}_{h}_mappings.bed"
-#     shell:"""
-# minimap2 -ax asm20 --secondary=yes -p 0.3 -N 10000 --eqx -r 500 -K 500M {input.hap_fa} {input.locus_fa} | \
-#     samtools view -b - | samtools sort | \
-#     bedtools bamtobed -i - | awk 'BEGIN{{OFS="\t"}}{{print $0, "{wildcards.r}__{wildcards.sm}_{wildcards.h}__" NR }}' > {output.bed} || touch {output.bed}
-# """
+
+rule get_locus_annotation:
+    '''given a sequence fasta, align and find places that locus maps to into he query haplotypes (for genes, duplicons, etc.).'''
+    input:
+        locus_fa = config["locus_fa"] ,
+        hap_fa = get_fasta,
+    output:
+        bed = "locus_mappings/{sm}_{h}_mappings.bed"
+    shell:"""
+minimap2 -ax asm20 --secondary=yes -p 0.3 -N 10000 --eqx -r 500 -K 500M {input.hap_fa} {input.locus_fa} | \
+    samtools view -b - | samtools sort | \
+    bedtools bamtobed -i - | awk 'BEGIN{{OFS="\t"}}{{print $0, "{wildcards.r}__{wildcards.sm}_{wildcards.h}__" NR }}' > {output.bed} || touch {output.bed}
+"""
+
 # rule all:
 #     input:
 #         expand(rules.Rhodonite_DupMasker.output, sample=config["samples"].keys())
