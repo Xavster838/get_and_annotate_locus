@@ -9,8 +9,11 @@ module Rhodonite:
     config:
         config
 
-manifest = pd.read_csv(config["manifest"], sep = "\t")
-config["samples"] = dict( zip( list(manifest["sample"]) ,  list(manifest["fasta"]) ) ) #list(manifest["fasta"]) ) )
+if( "samples" in config ):
+    continue
+elif("dup_manifest" in config):
+    dup_manifest = pd.read_csv(config["dup_manifest"], sep = "\t")
+    config["samples"] = dict( zip( list(dup_manifest["sample"]) ,  list(dup_manifest["fasta"]) ) )
 
 # import the rules from Rhodonite
 use rule * from Rhodonite as Rhodonite_*
@@ -25,3 +28,5 @@ use rule DupMasker from Rhodonite as Rhodonite_DupMasker with:
 rule only_dup:
     input:
         expand(rules.Rhodonite_DupMasker.output, sample = config["samples"].keys() )
+
+
