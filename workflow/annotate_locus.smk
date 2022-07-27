@@ -3,6 +3,7 @@ import pandas as pd
 
 min_version("6.0")
 
+include: "./get_rhodonite.smk "
 
 manifest = pd.read_csv(config["manifest"], sep = "\t")
 manifest = manifest.set_index(["sample" , "hap"] , drop = False)
